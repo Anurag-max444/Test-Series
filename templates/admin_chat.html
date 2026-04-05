@@ -1,0 +1,65 @@
+{% extends "admin_base.html" %}
+{% block title %}Chat Control{% endblock %}
+
+{% block content %}
+<div class="admin-header fade-in">
+  <div>
+    <h1>&#x1F4AC; Chat Control</h1>
+    <p class="text-muted text-sm">{{ messages|length }} message(s) in chat log</p>
+  </div>
+  <!-- Clear All button -->
+  <form method="POST" action="/admin/chat/clear"
+        onsubmit="return confirm('Delete ALL chat messages? This cannot be undone.')">
+    <button type="submit" class="btn btn-danger btn-sm">
+      &#x1F9F9; Clear All Messages
+    </button>
+  </form>
+</div>
+
+{% if messages %}
+<div class="admin-card fade-in">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>User</th>
+        <th>Message</th>
+        <th>Time</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in messages %}
+      <tr>
+        <td class="text-muted text-sm">#{{ m.id }}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <div class="chat-avatar" style="width:28px;height:28px;font-size:.7rem;flex-shrink:0">
+              {{ m.user_name[0]|upper }}
+            </div>
+            <strong>{{ m.user_name }}</strong>
+          </div>
+        </td>
+        <td style="max-width:400px;word-break:break-word">{{ m.message }}</td>
+        <td class="text-muted text-sm" style="white-space:nowrap">
+          {{ m.created_at|string|truncate(16, True, '') }}
+        </td>
+        <td>
+          <form method="POST" action="/admin/chat/delete/{{ m.id }}"
+                onsubmit="return confirm('Delete this message?')">
+            <button type="submit" class="btn btn-danger btn-sm">&#x1F5D1; Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card fade-in" style="text-align:center;padding:3rem">
+  <div style="font-size:3rem;margin-bottom:1rem">&#x1F4AC;</div>
+  <h3>No messages</h3>
+  <p class="text-muted mt-1">The chat is empty.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "admin_base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="admin-header fade-in">
+  <div>
+    <h1>📊 Dashboard</h1>
+    <p class="text-muted text-sm">Welcome back, {{ session.user_name }}!</p>
+  </div>
+  <div style="display:flex;gap:.5rem">
+    <a href="/mocktest" target="_blank" class="btn btn-secondary btn-sm">🌐 View Site</a>
+    <form method="POST" action="/admin/leaderboard/reset"
+          onsubmit="return confirm('Reset leaderboard? All mocktest results will be deleted.')">
+      <button type="submit" class="btn btn-danger btn-sm">🗑 Reset Leaderboard</button>
+    </form>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid fade-in" style="margin-bottom:2rem">
+  <div class="stat-card">
+    <div class="stat-icon purple">👥</div>
+    <div class="stat-info"><h3>{{ total_users }}</h3><p>Total Students</p></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon blue">📋</div>
+    <div class="stat-info"><h3>{{ total_attempts }}</h3><p>Quiz Attempts</p></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green">❓</div>
+    <div class="stat-info"><h3>{{ total_questions }}</h3><p>Questions</p></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon yellow">⚡</div>
+    <div class="stat-info"><h3>Live</h3><p>System Status</p></div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<h2 style="font-size:1rem;font-weight:700;margin-bottom:1rem" class="fade-in">⚡ Quick Actions</h2>
+<div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:2rem" class="fade-in">
+  <a href="/admin/questions/add" class="btn btn-primary">➕ Add Question</a>
+  <a href="/admin/upload_csv" class="btn btn-secondary">📤 Upload CSV</a>
+  <a href="/admin/users" class="btn btn-secondary">👥 View Users</a>
+  <a href="/admin/questions" class="btn btn-secondary">❓ Manage Questions</a>
+  <a href="/admin/notifications" class="btn btn-secondary">🔔 Notifications</a>
+  <a href="/leaderboard" target="_blank" class="btn btn-secondary">🏆 Leaderboard</a>
+</div>
+
+<!-- Recent Users -->
+<h2 style="font-size:1rem;font-weight:700;margin-bottom:1rem" class="fade-in">👤 Recent Registrations</h2>
+<div class="admin-card fade-in">
+  <table class="admin-table">
+    <thead><tr><th>Name</th><th>Email</th><th>Joined</th></tr></thead>
+    <tbody>
+      {% for u in recent_users %}
+      <tr>
+        <td><strong>{{ u.name }}</strong></td>
+        <td class="text-muted">{{ u.email }}</td>
+        <td class="text-muted text-sm">{{ u.created_at.strftime('%d %b %Y') if u.created_at else '' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3" style="text-align:center;color:var(--text3)">No users yet</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- CSV Format -->
+<div class="card mt-3 fade-in">
+  <h3 style="font-size:.95rem;font-weight:700;margin-bottom:.75rem">📋 CSV Upload Format</h3>
+  <code style="font-size:.78rem;color:var(--text2);font-family:var(--font-mono)">
+    class_name,subject,chapter,question,option_a,option_b,option_c,option_d,correct_option,explanation
+  </code>
+  <p class="text-muted text-xs mt-1">correct_option should be A, B, C, or D</p>
+  <a href="/admin/upload_csv" class="btn btn-secondary btn-sm mt-2">📤 Upload CSV Now</a>
+</div>
+{% endblock %}

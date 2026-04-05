@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card fade-in">
+    <div style="font-size:2.5rem;margin-bottom:1rem">✨</div>
+    <h1>Create Account</h1>
+    <p class="sub">Join QuizMaster Pro for free</p>
+    <form method="POST" action="/register">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" name="name" class="form-control" placeholder="Your full name" required>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" name="email" class="form-control" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" class="form-control" placeholder="At least 6 characters" required minlength="6">
+      </div>
+      <button type="submit" class="btn btn-primary w-full" style="justify-content:center;margin-bottom:1rem">Create Account →</button>
+    </form>
+    <div class="auth-divider">or</div>
+    <p style="text-align:center;font-size:.875rem;color:var(--text2)">
+      Already have an account? <a href="/login">Login here</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

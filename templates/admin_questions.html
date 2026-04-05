@@ -1,0 +1,94 @@
+{% extends "admin_base.html" %}
+{% block title %}Questions{% endblock %}
+
+{% block content %}
+<div class="admin-header fade-in">
+  <div>
+    <h1>❓ Manage Questions</h1>
+    <p class="text-muted text-sm">Add, edit, or delete quiz questions</p>
+  </div>
+  <div style="display:flex;gap:.75rem">
+    <a href="/admin/questions/add" class="btn btn-primary btn-sm">➕ Add Question</a>
+    <a href="/admin/upload_csv" class="btn btn-secondary btn-sm">📤 Upload CSV</a>
+  </div>
+</div>
+
+<!-- Filter -->
+<div class="card mb-2 fade-in">
+  <form method="GET" style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end">
+    <div class="form-group" style="margin:0;flex:1;min-width:130px">
+      <label>Class</label>
+      <select name="class_name" class="form-control">
+        <option value="">All Classes</option>
+        <option value="10th" {% if cls_filter=='10th' %}selected{% endif %}>10th</option>
+        <option value="11th" {% if cls_filter=='11th' %}selected{% endif %}>11th</option>
+        <option value="12th" {% if cls_filter=='12th' %}selected{% endif %}>12th</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;flex:1;min-width:130px">
+      <label>Subject</label>
+      <select name="subject" class="form-control">
+        <option value="">All Subjects</option>
+        <option value="Physics" {% if sub_filter=='Physics' %}selected{% endif %}>Physics</option>
+        <option value="Chemistry" {% if sub_filter=='Chemistry' %}selected{% endif %}>Chemistry</option>
+        <option value="Math" {% if sub_filter=='Math' %}selected{% endif %}>Math</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+    <a href="/admin/questions" class="btn btn-secondary btn-sm">Reset</a>
+  </form>
+</div>
+
+<p class="text-muted text-sm mb-2 fade-in">Showing {{ questions|length }} question(s)</p>
+
+<div class="admin-card fade-in" style="overflow-x:auto">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Class</th>
+        <th>Subject</th>
+        <th>Chapter</th>
+        <th>Question</th>
+        <th>Answer</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for q in questions %}
+      <tr>
+        <td class="text-muted">#{{ q.id }}</td>
+        <td><span style="color:var(--accent);font-weight:600">{{ q.class_name }}</span></td>
+        <td>{{ q.subject }}</td>
+        <td>{{ q.chapter }}</td>
+        <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ q.question }}">
+          {{ q.question }}
+        </td>
+        <td>
+          <span style="
+            background:rgba(16,185,129,0.15);color:#10b981;
+            padding:.2rem .6rem;border-radius:6px;font-weight:700;font-size:.8rem">
+            {{ q.correct_option }}
+          </span>
+        </td>
+        <td>
+          <div style="display:flex;gap:.4rem">
+            <a href="/admin/questions/edit/{{ q.id }}" class="btn btn-secondary btn-sm">✏️ Edit</a>
+            <form method="POST" action="/admin/questions/delete/{{ q.id }}"
+                  onsubmit="return confirm('Delete this question?')">
+              <button type="submit" class="btn btn-danger btn-sm">🗑️</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="7" style="text-align:center;color:var(--text3);padding:2rem">
+          No questions found. <a href="/admin/questions/add">Add one?</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

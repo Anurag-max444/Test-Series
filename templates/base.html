@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ── SEO Meta Tags ──────────────────────────────────────────────── -->
+  <title>{% block title %}QuizMaster Pro{% endblock %} | QuizMaster Pro</title>
+  <meta name="description"    content="{% block meta_desc %}The ultimate quiz platform for Class 10th, 11th & 12th students. Chapter-wise tests in Physics, Chemistry and Math — free, fast, and mobile friendly.{% endblock %}">
+  <meta name="keywords"       content="{% block meta_keys %}quiz, online test, class 10, class 11, class 12, physics, chemistry, math, NCERT, MCQ, leaderboard{% endblock %}">
+  <meta name="author"         content="Ayush Vishwakarma">
+  <meta name="robots"         content="index, follow">
+  <link rel="canonical"       href="{{ request.url }}">
+
+  <!-- ── NEW: User login state for JS (no sensitive data) ────────────── -->
+  <meta name="user-logged-in" content="{{ 'true' if session.user_id else 'false' }}">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="{% block og_title %}QuizMaster Pro — Smart Quiz Platform{% endblock %}">
+  <meta property="og:description" content="{% block og_desc %}Chapter-wise MCQ tests for Class 10-12 in Physics, Chemistry & Math. Free, timed, ranked.{% endblock %}">
+  <meta property="og:url"         content="{{ request.url }}">
+  <meta property="og:site_name"   content="QuizMaster Pro">
+  <meta property="og:image"       content="{{ request.host_url }}static/icons/icon-512x512.svg">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary">
+  <meta name="twitter:title"       content="QuizMaster Pro">
+  <meta name="twitter:description" content="Smart online quiz platform for Class 10-12 students.">
+
+  <!-- ── NEW: PWA meta tags ───────────────────────────────────────────── -->
+  <meta name="mobile-web-app-capable"       content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title"   content="QuizMaster">
+  <meta name="application-name"             content="QuizMaster Pro">
+  <meta name="theme-color"                  content="#4f8ef7">
+  <meta name="msapplication-TileColor"      content="#0a0e1a">
+
+  <!-- ── NEW: PWA manifest ────────────────────────────────────────────── -->
+  <link rel="manifest" href="/static/manifest.json">
+
+  <!-- ── NEW: Favicon & App Icons ─────────────────────────────────────── -->
+  <link rel="icon"             href="/static/icons/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/static/icons/icon-152x152.svg">
+  <link rel="icon" sizes="192x192" href="/static/icons/icon-192x192.svg">
+
+  <!-- ── Fonts ────────────────────────────────────────────────────────── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- ── Stylesheet ───────────────────────────────────────────────────── -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <!-- ── Google AdSense ───────────────────────────────────────────────── -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1244250782234399"
+          crossorigin="anonymous"></script>
+
+  <!-- ── Google Analytics (GA4) ───────────────────────────────────────── -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-D1DT7T9F3K"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-D1DT7T9F3K');
+  </script>
+
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+<!-- Flash messages (hidden, processed by JS) -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}
+    <div class="flash-msg" data-msg="{{ msg }}" data-type="{{ cat }}" style="display:none"></div>
+  {% endfor %}
+{% endwith %}
+
+<!-- ── Navbar ──────────────────────────────────────────────────────────── -->
+<nav class="navbar">
+  <a href="/" class="navbar-brand">
+    <!-- NEW: SVG logo instead of emoji -->
+    <div class="logo-svg-wrap">
+      <img src="/static/icons/icon-72x72.svg" alt="QuizMaster logo" width="34" height="34">
+    </div>
+    QuizMaster
+  </a>
+  <ul class="nav-links">
+    <li><a href="/">&#x1F3E0; Home</a></li>
+    <li><a href="/mocktest">&#x1F4DD; Mock Test</a></li>
+    <li><a href="/leaderboard">&#x1F3C6; Leaderboard</a></li>
+    <li><a href="/chat">&#x1F4AC; Chat</a></li>
+    <li><a href="/about">&#x2139;&#xFE0F; About</a></li>
+    <li><a href="/contact">&#x1F4EC; Contact</a></li>
+    {% if session.user_id %}
+    <li><a href="/dashboard">&#x26A1; Dashboard</a></li>
+    {% endif %}
+  </ul>
+  <div class="nav-user">
+    {% if session.user_id %}
+      <!-- NEW: Notification bell (populated by notifications.js) -->
+      <!-- NotifSystem.init() injects bell here automatically -->
+      <div class="nav-avatar" title="{{ session.user_name }}">
+        {{ session.user_name[0]|upper }}
+      </div>
+      <span style="font-size:.85rem;font-weight:600;color:var(--text2)">{{ session.user_name }}</span>
+      <a href="/logout" class="btn btn-secondary btn-sm">Logout</a>
+    {% else %}
+      <a href="/login" class="btn btn-secondary btn-sm">Login</a>
+      <a href="/register" class="btn btn-primary btn-sm">Sign Up</a>
+    {% endif %}
+  </div>
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobile-menu">
+  <a href="/">&#x1F3E0; Home</a>
+  <a href="/mocktest">&#x1F4DD; Mock Test</a>
+  <a href="/leaderboard">&#x1F3C6; Leaderboard</a>
+  <a href="/chat">&#x1F4AC; Live Chat</a>
+  <a href="/about">&#x2139;&#xFE0F; About</a>
+  <a href="/contact">&#x1F4EC; Contact</a>
+  {% if session.user_id %}
+  <a href="/dashboard">&#x26A1; Dashboard</a>
+  <a href="/logout">&#x1F6AA; Logout</a>
+  {% else %}
+  <a href="/login">&#x1F511; Login</a>
+  <a href="/register">&#x2728; Register</a>
+  {% endif %}
+</div>
+
+<!-- Coming Soon Modal -->
+<div class="modal-overlay" id="coming-soon-modal" onclick="if(event.target===this)closeModal('coming-soon-modal')">
+  <div class="modal-box">
+    <div class="modal-anim">&#x1F680;</div>
+    <h2 class="modal-title">Coming Soon!</h2>
+    <p>This feature is currently under development. We're working hard to bring it to you soon!</p>
+    <div style="display:flex;gap:.75rem;justify-content:center">
+      <button class="btn btn-primary" onclick="closeModal('coming-soon-modal')">Got it! &#x1F44D;</button>
+    </div>
+  </div>
+</div>
+
+{% block content %}{% endblock %}
+
+<!-- ── Footer ───────────────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem">
+        <div class="logo-svg-wrap" style="width:36px;height:36px">
+          <img src="/static/icons/icon-72x72.svg" alt="logo" width="36" height="36">
+        </div>
+        <h3 style="margin:0">QuizMaster Pro</h3>
+      </div>
+      <p>The ultimate quiz platform for Class 10th, 11th &amp; 12th students. Master Physics, Chemistry &amp; Math with adaptive chapter-wise tests.</p>
+      <div class="footer-dev-card">
+        <div class="footer-dev-line">
+          <span class="footer-dev-icon">&#x1F468;&#x200D;&#x1F4BB;</span>
+          <span>Developed by <strong>Ayush Vishwakarma</strong></span>
+        </div>
+        <div class="footer-dev-line">
+          <span class="footer-dev-icon">&#x1F6E0;&#xFE0F;</span>
+          <span>Managed by <strong>Omveer Singh</strong></span>
+        </div>
+        <div class="footer-dev-line">
+          <span class="footer-dev-icon">&#x1F4E7;</span>
+          <a href="mailto:ayushvishwakarma1553@gmail.com">ayushvishwakarma1553@gmail.com</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="/">&#x1F3E0; Home</a></li>
+        <li><a href="/mocktest">&#x1F4DD; Mock Test</a></li>
+        <li><a href="/leaderboard">&#x1F3C6; Leaderboard</a></li>
+        <li><a href="/chat">&#x1F4AC; Live Chat</a></li>
+        <li><a href="/dashboard">&#x26A1; Dashboard</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Subjects</h4>
+      <ul>
+        <li><a href="/quiz">&#x26DB;&#xFE0F; Physics</a></li>
+        <li><a href="/quiz">&#x1F9EA; Chemistry</a></li>
+        <li><a href="/quiz">&#x1F4D0; Mathematics</a></li>
+        <li><a href="/quiz">&#x1F4DA; Class 10th</a></li>
+        <li><a href="/quiz">&#x1F4DA; Class 11th</a></li>
+        <li><a href="/quiz">&#x1F4DA; Class 12th</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact &amp; Info</h4>
+      <ul>
+        <li><a href="/about">&#x2139;&#xFE0F; About Us</a></li>
+        <li><a href="/contact">&#x1F4EC; Contact Us</a></li>
+        <li><a href="mailto:ayushvishwakarma1553@gmail.com">&#x1F4E7; Email Us</a></li>
+        <li><a href="https://t.me/JoyAyush" target="_blank" rel="noopener">&#x2708;&#xFE0F; Telegram</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 QuizMaster Pro. All rights reserved.</span>
+    <span style="display:flex;align-items:center;gap:.4rem">
+      Developed with &#x2764;&#xFE0F; by <strong style="color:var(--text)">Ayush Vishwakarma</strong>
+    </span>
+  </div>
+</footer>
+
+<!-- ── Scripts ─────────────────────────────────────────────────────────────── -->
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<!-- NEW: Notification + PWA script (load after main.js) -->
+<script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

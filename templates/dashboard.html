@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header fade-in">
+    <h1>👋 Welcome, {{ session.user_name }}!</h1>
+    <p>Your performance overview — Mock Tests &amp; Quiz history</p>
+  </div>
+
+  <!-- Stats grid — 6 cards (2 new for mocktest) -->
+  <div class="stats-grid fade-in" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">
+    <div class="stat-card">
+      <div class="stat-icon blue">📝</div>
+      <div class="stat-info">
+        <h3>{{ total_attempts }}</h3>
+        <p>Quiz Attempts</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">🏆</div>
+      <div class="stat-info">
+        <h3>{{ best_score }}%</h3>
+        <p>Best Quiz Score</p>
+      </div>
+    </div>
+    <!-- NEW: Mocktest stats -->
+    <div class="stat-card">
+      <div class="stat-icon purple">📋</div>
+      <div class="stat-info">
+        <h3>{{ mock_attempts }}</h3>
+        <p>Mock Tests Taken</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon yellow">🎯</div>
+      <div class="stat-info">
+        <h3>{{ mock_best }}%</h3>
+        <p>Best Mock Accuracy</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue">⚡</div>
+      <div class="stat-info">
+        <h3>{{ results|length }}</h3>
+        <p>Recent Quizzes</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">✅</div>
+      <div class="stat-info">
+        <h3>Active</h3>
+        <p>Account Status</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ad Space (Google AdSense) -->
+  <div class="ad-wrap">
+    <span>Advertisement</span>
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-1244250782234399"
+         data-ad-slot="auto"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <!-- Quick Actions — /quiz → /mocktest -->
+  <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:1rem" class="fade-in">⚡ Quick Actions</h2>
+  <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:2rem" class="fade-in">
+    <a href="/mocktest" class="btn btn-primary">📋 Take Mock Test</a>
+    <a href="/leaderboard" class="btn btn-secondary">🏆 Leaderboard</a>
+    <a href="/chat" class="btn btn-secondary">💬 Live Chat</a>
+  </div>
+
+  <!-- Coming Soon features -->
+  <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:1rem" class="fade-in">🔮 Coming Soon</h2>
+  <div class="future-grid fade-in">
+    <div class="future-card" onclick="showComingSoon('Analytics Dashboard', '📊')">
+      <div class="fi">📊</div>
+      <h4>Analytics</h4>
+      <span class="badge-soon">Soon</span>
+    </div>
+    <div class="future-card" onclick="showComingSoon('Premium Tests', '💎')">
+      <div class="fi">💎</div>
+      <h4>Premium Tests</h4>
+      <span class="badge-soon">Soon</span>
+    </div>
+    <div class="future-card" onclick="showComingSoon('Mobile App', '📱')">
+      <div class="fi">📱</div>
+      <h4>Mobile App</h4>
+      <span class="badge-soon">Soon</span>
+    </div>
+    <div class="future-card" onclick="showComingSoon('AI Doubt Solver', '🤖')">
+      <div class="fi">🤖</div>
+      <h4>AI Doubt Solver</h4>
+      <span class="badge-soon">Soon</span>
+    </div>
+    <div class="future-card" onclick="showComingSoon('Daily Challenge', '🎯')">
+      <div class="fi">🎯</div>
+      <h4>Daily Challenge</h4>
+      <span class="badge-soon">Soon</span>
+    </div>
+  </div>
+
+  <!-- Recent Results (existing quiz history kept intact) -->
+  <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:1rem" class="fade-in">📋 Recent Quiz History</h2>
+  {% if results %}
+  <div class="table-wrap fade-in">
+    <table class="lb-table">
+      <thead>
+        <tr>
+          <th>Class</th>
+          <th>Subject</th>
+          <th>Chapter</th>
+          <th>Score</th>
+          <th>Percentage</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in results %}
+        <tr>
+          <td><span class="badge-soon" style="color:var(--text2)">{{ r.class_name }}</span></td>
+          <td>{{ r.subject }}</td>
+          <td>{{ r.chapter }}</td>
+          <td><strong style="color:var(--accent)">{{ r.score }}/{{ r.total }}</strong></td>
+          <td>
+            <div style="display:flex;align-items:center;gap:.6rem">
+              <div class="pct-bar">
+                <div class="pct-fill" style="width:{{ (r.score/r.total*100)|round }}%"></div>
+              </div>
+              <span>{{ (r.score/r.total*100)|round }}%</span>
+            </div>
+          </td>
+          <td class="text-muted text-sm">
+            {{ r.created_at.strftime('%d %b %Y') if r.created_at else '' }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card" style="text-align:center;padding:3rem">
+    <div style="font-size:3rem;margin-bottom:1rem">📋</div>
+    <h3>No mock tests taken yet</h3>
+    <p class="text-muted mt-1 mb-2">Start your first mock test and see results here!</p>
+    <a href="/mocktest" class="btn btn-primary">Take Mock Test →</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

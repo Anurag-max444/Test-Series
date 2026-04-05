@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card fade-in">
+    <div style="font-size:2.5rem;margin-bottom:1rem">🔑</div>
+    <h1>Welcome Back</h1>
+    <p class="sub">Login to your QuizMaster account</p>
+    <form method="POST" action="/login">
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" name="email" class="form-control" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" class="form-control" placeholder="Your password" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-full" style="justify-content:center;margin-bottom:1rem">Login →</button>
+    </form>
+    <div class="auth-divider">or</div>
+    <p style="text-align:center;font-size:.875rem;color:var(--text2)">
+      Don't have an account? <a href="/register">Register here</a>
+    </p>
+    <div style="margin-top:1.5rem;padding:1rem;background:rgba(79,142,247,0.08);border-radius:10px;font-size:.8rem;color:var(--text2)">
+      <strong style="color:var(--accent)">Admin access:</strong> Contact <a href="mailto:ayushvishwakarma1553@gmail.com">Ayush</a> for credentials.
+    </div>
+  </div>
+</div>
+{% endblock %}

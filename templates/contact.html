@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Contact Us{% endblock %}
+{% block meta_desc %}Contact QuizMaster Pro — reach out via email or Telegram. Developed and managed by Ayush Vishwakarma.{% endblock %}
+
+{% block content %}
+<div class="page-wrap" style="max-width:860px">
+
+  <div class="page-header fade-in">
+    <h1>&#x1F4EC; Contact Us</h1>
+    <p>Have a question, suggestion or bug report? We'd love to hear from you!</p>
+  </div>
+
+  <!-- Contact info cards -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:2rem" class="fade-in">
+
+    <div class="contact-info-card">
+      <div class="contact-info-icon" style="background:rgba(79,142,247,0.15)">&#x1F4E7;</div>
+      <h4>Email</h4>
+      <a href="mailto:ayushvishwakarma1553@gmail.com" class="contact-info-link">
+        ayushvishwakarma1553@gmail.com
+      </a>
+      <p class="text-muted text-xs" style="margin-top:.3rem">We reply within 24 hours</p>
+    </div>
+
+    <div class="contact-info-card">
+      <div class="contact-info-icon" style="background:rgba(37,211,102,0.12)">&#x2708;&#xFE0F;</div>
+      <h4>Telegram</h4>
+      <a href="https://t.me/JoyAyush" target="_blank" rel="noopener" class="contact-info-link">
+        @JoyAyush
+      </a>
+      <p class="text-muted text-xs" style="margin-top:.3rem">Fast replies on Telegram</p>
+    </div>
+
+    <div class="contact-info-card">
+      <div class="contact-info-icon" style="background:rgba(124,58,237,0.12)">&#x1F468;&#x200D;&#x1F4BB;</div>
+      <h4>Developer</h4>
+      <span class="contact-info-link" style="cursor:default">Ayush Vishwakarma</span>
+      <p class="text-muted text-xs" style="margin-top:.3rem">Managed by Ayush</p>
+    </div>
+
+  </div>
+
+  <!-- Contact Form -->
+  <div class="card fade-in">
+    <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem">&#x270D;&#xFE0F; Send a Message</h2>
+    <form onsubmit="submitContact(event)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group">
+          <label>Your Name *</label>
+          <input type="text" id="c-name" class="form-control" placeholder="Full name" required>
+        </div>
+        <div class="form-group">
+          <label>Email Address *</label>
+          <input type="email" id="c-email" class="form-control" placeholder="you@example.com" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Subject</label>
+        <select id="c-subject" class="form-control">
+          <option>General Enquiry</option>
+          <option>Bug Report</option>
+          <option>Content Feedback</option>
+          <option>Feature Request</option>
+          <option>Partnership</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Message *</label>
+        <textarea id="c-message" class="form-control" rows="5"
+                  placeholder="Describe your question or feedback in detail..."
+                  required style="resize:vertical"></textarea>
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+        <button type="submit" class="btn btn-primary">Send Message &#x1F4E4;</button>
+        <p class="text-muted text-xs">
+          Or email directly:
+          <a href="mailto:ayushvishwakarma1553@gmail.com">ayushvishwakarma1553@gmail.com</a>
+        </p>
+      </div>
+    </form>
+  </div>
+
+  <!-- AdSense placeholder -->
+  <div class="ad-wrap mt-3">
+    <span>Advertisement</span>
+    Google AdSense (728x90) — Insert ad unit code here
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function submitContact(e) {
+  e.preventDefault();
+  const name    = document.getElementById('c-name').value.trim();
+  const email   = document.getElementById('c-email').value.trim();
+  const subject = document.getElementById('c-subject').value;
+  const message = document.getElementById('c-message').value.trim();
+  // In production: send via fetch to a backend route or email service
+  Toast.show('Message sent! We\'ll reply to ' + email + ' soon. &#x1F4E7;', 'success', 5000);
+  e.target.reset();
+}
+</script>
+{% endblock %}

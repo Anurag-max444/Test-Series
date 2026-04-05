@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | {% block title %}Dashboard{% endblock %} — QuizMaster</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+</head>
+<body>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}
+    <div class="flash-msg" data-msg="{{ msg }}" data-type="{{ cat }}" style="display:none"></div>
+  {% endfor %}
+{% endwith %}
+
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="brand">
+      <h2>⚙️ Admin Panel</h2>
+      <p>{{ session.user_name }}</p>
+    </div>
+    <ul class="admin-nav">
+      <li class="nav-section">Overview</li>
+      <li><a href="/admin/dashboard" class="{% if request.path=='/admin/dashboard' %}active{% endif %}">📊 Dashboard</a></li>
+      <li class="nav-section">Content</li>
+      <li><a href="/admin/questions" class="{% if '/questions' in request.path %}active{% endif %}">❓ Questions</a></li>
+      <li><a href="/admin/questions/add">➕ Add Question</a></li>
+      <li><a href="/admin/upload_csv">📤 Upload CSV</a></li>
+      <li class="nav-section">Users</li>
+      <li><a href="/admin/users" class="{% if request.path=='/admin/users' %}active{% endif %}">👥 All Users</a></li>
+      <li class="nav-section">Moderation</li>
+      <li><a href="/admin/chat" class="{% if request.path=='/admin/chat' %}active{% endif %}">💬 Chat Control</a></li>
+      <li><a href="/admin/notifications" class="{% if request.path=='/admin/notifications' %}active{% endif %}">🔔 Notifications</a></li>
+      <li class="nav-section">Account</li>
+      <li><a href="/" target="_blank">🌐 View Site</a></li>
+      <li><a href="/admin/logout">🚪 Logout</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="admin-main">
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,88 @@
+{% extends "admin_base.html" %}
+{% block title %}Upload CSV{% endblock %}
+
+{% block content %}
+<div class="admin-header fade-in">
+  <div>
+    <h1>📤 Upload Questions via CSV</h1>
+    <p class="text-muted text-sm">Bulk import questions from a CSV file</p>
+  </div>
+  <a href="/admin/questions" class="btn btn-secondary btn-sm">← Back to Questions</a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:960px">
+  <!-- Upload Form -->
+  <div class="card fade-in">
+    <h2 style="font-size:1rem;font-weight:700;margin-bottom:1.5rem">📁 Select CSV File</h2>
+    <form method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label>CSV File *</label>
+        <input type="file" name="csv_file" class="form-control" accept=".csv" required
+               style="padding:.55rem .75rem;cursor:pointer">
+        <p class="text-muted text-xs mt-1">Only .csv files are accepted. Max 5MB.</p>
+      </div>
+      <button type="submit" class="btn btn-primary w-full" style="justify-content:center">
+        📤 Upload & Import
+      </button>
+    </form>
+  </div>
+
+  <!-- Format Guide -->
+  <div class="card fade-in">
+    <h2 style="font-size:1rem;font-weight:700;margin-bottom:1rem">📋 CSV Format</h2>
+    <p class="text-muted text-sm mb-2">Your CSV must have these columns in this exact order:</p>
+    <div style="background:var(--bg3);border-radius:10px;padding:1rem;overflow-x:auto">
+      <code style="font-family:var(--font-mono);font-size:.72rem;color:var(--accent);white-space:nowrap">
+        class_name,subject,chapter,question,option_a,option_b,option_c,option_d,correct_option,explanation
+      </code>
+    </div>
+    <div style="margin-top:1rem">
+      <p class="text-muted text-xs mb-1"><strong style="color:var(--text2)">Example row:</strong></p>
+      <div style="background:var(--bg3);border-radius:8px;padding:.75rem;overflow-x:auto">
+        <code style="font-family:var(--font-mono);font-size:.68rem;color:var(--text2);white-space:nowrap;line-height:1.8">
+          10th,Physics,Motion,What is speed?,Fast,Slow,Distance/Time,None,C,Speed = Distance ÷ Time
+        </code>
+      </div>
+    </div>
+    <ul style="font-size:.8rem;color:var(--text3);line-height:2;list-style:disc;padding-left:1.2rem;margin-top:1rem">
+      <li>correct_option must be exactly: <strong style="color:var(--accent)">A, B, C, or D</strong></li>
+      <li>class_name must be: <strong style="color:var(--accent)">10th, 11th, or 12th</strong></li>
+      <li>subject must be: <strong style="color:var(--accent)">Physics, Chemistry, or Math</strong></li>
+      <li>explanation column is optional but recommended</li>
+      <li>Include a header row (column names on first line)</li>
+      <li>Rows with errors will be skipped silently</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Sample Download -->
+<div class="card mt-2 fade-in" style="max-width:960px">
+  <h3 style="font-size:.95rem;font-weight:700;margin-bottom:.5rem">📥 Sample CSV Content</h3>
+  <p class="text-muted text-sm mb-1">Copy this into a .csv file to get started:</p>
+  <div style="background:var(--bg3);border-radius:10px;padding:1rem;overflow-x:auto">
+    <pre style="font-family:var(--font-mono);font-size:.72rem;color:var(--text2);margin:0;line-height:1.8">class_name,subject,chapter,question,option_a,option_b,option_c,option_d,correct_option,explanation
+10th,Physics,Motion,What is the SI unit of force?,Joule,Newton,Pascal,Watt,B,SI unit of force is Newton
+11th,Chemistry,Equilibrium,What does Kc represent?,Rate constant,Equilibrium constant,Concentration,None,B,Kc is the equilibrium constant
+12th,Math,Integration,Integral of sin(x) is?,cos(x),-cos(x),tan(x),sec(x),B,∫sin(x)dx = -cos(x) + C</pre>
+  </div>
+  <button class="btn btn-secondary btn-sm mt-2"
+          onclick="copyCSV()"
+          id="copy-btn">📋 Copy Sample CSV</button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyCSV() {
+  const text = `class_name,subject,chapter,question,option_a,option_b,option_c,option_d,correct_option,explanation
+10th,Physics,Motion,What is the SI unit of force?,Joule,Newton,Pascal,Watt,B,SI unit of force is Newton
+11th,Chemistry,Equilibrium,What does Kc represent?,Rate constant,Equilibrium constant,Concentration,None,B,Kc is the equilibrium constant
+12th,Math,Integration,Integral of sin(x) is?,cos(x),-cos(x),tan(x),sec(x),B,∫sin(x)dx = -cos(x) + C`;
+  navigator.clipboard.writeText(text).then(() => {
+    Toast.show('Sample CSV copied to clipboard!', 'success');
+    document.getElementById('copy-btn').textContent = '✅ Copied!';
+    setTimeout(() => document.getElementById('copy-btn').textContent = '📋 Copy Sample CSV', 2000);
+  });
+}
+</script>
+{% endblock %}
