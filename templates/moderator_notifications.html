@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Moderator — Send Notifications{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header fade-in">
+    <h1>&#x1F514; Moderator Panel</h1>
+    <p>Send notifications to all users</p>
+  </div>
+
+  <!-- Send form -->
+  <div class="card fade-in" style="max-width:640px;margin-bottom:2rem">
+    <h2 style="font-size:1rem;font-weight:700;margin-bottom:1.2rem">&#x2709;&#xFE0F; Send Notification</h2>
+    <form method="POST" action="/moderator/notifications/send">
+      <div class="form-group">
+        <label>Title *</label>
+        <input type="text" name="title" class="form-control"
+               placeholder="e.g. New Biology Chapter Added!" required maxlength="120">
+      </div>
+      <div class="form-group">
+        <label>Message *</label>
+        <textarea name="message" class="form-control" rows="3"
+                  placeholder="Write your notification..." required maxlength="500"
+                  style="resize:vertical"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">&#x1F4E8; Send to All Users</button>
+    </form>
+  </div>
+
+  <!-- Sent list -->
+  <h2 style="font-size:1rem;font-weight:700;margin-bottom:1rem" class="fade-in">
+    &#x1F4CB; Sent Notifications ({{ notifications|length }})
+  </h2>
+
+  {% if notifications %}
+  <div class="table-wrap fade-in">
+    <table class="lb-table">
+      <thead>
+        <tr><th>Title</th><th>Message</th><th>Read / Sent</th><th>Time</th></tr>
+      </thead>
+      <tbody>
+        {% for n in notifications %}
+        <tr>
+          <td><strong>{{ n.title }}</strong></td>
+          <td class="text-muted text-sm" style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+            {{ n.message }}
+          </td>
+          <td>
+            <span style="color:var(--accent);font-weight:600">{{ n.read_count }}</span>
+            <span class="text-muted"> / {{ n.total_sent }}</span>
+          </td>
+          <td class="text-muted text-sm">
+            {{ n.created_at.strftime('%d %b %Y %H:%M') if n.created_at else '' }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card" style="text-align:center;padding:2.5rem">
+    <div style="font-size:3rem;margin-bottom:1rem">&#x1F514;</div>
+    <h3>No notifications sent yet</h3>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Moderator Panel{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header fade-in" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+    <div>
+      <h1>🛡️ Moderator Panel</h1>
+      <p class="text-muted">Chat moderation and notifications for <strong>{{ session.user_name }}</strong></p>
+    </div>
+    <a href="/dashboard" class="btn btn-secondary btn-sm">← Dashboard</a>
+  </div>
+
+  <!-- Send Notification -->
+  <div class="card fade-in mb-2">
+    <h2 style="font-size:1rem;font-weight:700;margin-bottom:1.25rem">📢 Send Notification to All Users</h2>
+    <form method="POST" action="/moderator/notifications/send">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group" style="margin:0">
+          <label>Title *</label>
+          <input type="text" name="title" class="form-control" placeholder="Notification title..." required maxlength="120">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>&nbsp;</label>
+          <button type="submit" class="btn btn-primary w-full" style="justify-content:center">
+            📤 Send to All Users
+          </button>
+        </div>
+      </div>
+      <div class="form-group mt-1">
+        <label>Message *</label>
+        <textarea name="message" class="form-control" rows="2" placeholder="Message body..." required maxlength="500" style="resize:vertical"></textarea>
+      </div>
+    </form>
+  </div>
+
+  <!-- Recent notifications sent -->
+  <h2 style="font-size:1rem;font-weight:700;margin-bottom:1rem" class="fade-in">🔔 Recent Notifications</h2>
+  {% if notifications %}
+  <div class="table-wrap fade-in mb-2">
+    <table class="lb-table">
+      <thead><tr><th>Title</th><th>Message</th><th>Read/Sent</th><th>Date</th></tr></thead>
+      <tbody>
+        {% for n in notifications %}
+        <tr>
+          <td><strong>{{ n.title }}</strong></td>
+          <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ n.message }}">{{ n.message }}</td>
+          <td>
+            <span style="color:var(--accent);font-weight:600">{{ n.read_count or 0 }}</span>
+            <span class="text-muted"> / {{ n.total_sent or 0 }}</span>
+          </td>
+          <td class="text-muted text-sm">{{ n.created_at.strftime('%d %b %Y') if n.created_at else '' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card text-muted text-sm mb-2" style="padding:1.5rem;text-align:center">No notifications sent yet.</div>
+  {% endif %}
+
+  <!-- Chat moderation -->
+  <h2 style="font-size:1rem;font-weight:700;margin-bottom:1rem" class="fade-in">💬 Chat Moderation</h2>
+  {% if messages %}
+  <div class="admin-card fade-in">
+    <table class="lb-table">
+      <thead><tr><th>User</th><th>Message</th><th>Time</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for m in messages %}
+        <tr>
+          <td><strong>{{ m.user_name }}</strong></td>
+          <td style="max-width:320px;word-break:break-word;font-size:.85rem">{{ m.message }}</td>
+          <td class="text-muted text-sm">{{ m.created_at.strftime('%d %b %H:%M') if m.created_at else '' }}</td>
+          <td>
+            <button class="btn btn-danger btn-sm"
+                    onclick="modDeleteMsg({{ m.id }}, this)">
+              🗑️ Delete
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card text-muted text-sm" style="padding:1.5rem;text-align:center">No messages in chat.</div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function modDeleteMsg(msgId, btn) {
+  if (!confirm('Delete this message?')) return;
+  try {
+    const res = await fetch(`/chat/delete/${msgId}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.status === 'deleted') {
+      const row = btn.closest('tr');
+      row.style.opacity = '0';
+      row.style.transition = 'opacity .3s';
+      setTimeout(() => row.remove(), 300);
+      Toast.show('Message deleted.', 'info');
+    } else {
+      Toast.show(data.error || 'Could not delete.', 'error');
+    }
+  } catch(e) {
+    Toast.show('Network error.', 'error');
+  }
+}
+</script>
+{% endblock %}

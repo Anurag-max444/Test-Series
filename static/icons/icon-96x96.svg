@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4f8ef7;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a2235;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#0a0e1a;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+  <!-- Dark background -->
+  <rect width="96" height="96" rx="19" fill="url(#bg2)"/>
+  <!-- Gradient accent circle -->
+  <circle cx="48" cy="48" r="36" fill="url(#bg)" opacity="0.15"/>
+  <!-- Target / Quiz icon -->
+  <circle cx="48" cy="48" r="30" fill="none" stroke="url(#bg)" stroke-width="2"/>
+  <circle cx="48" cy="48" r="17" fill="none" stroke="#4f8ef7" stroke-width="1"/>
+  <circle cx="48" cy="48" r="3" fill="#4f8ef7"/>
+  <!-- Crosshair lines -->
+  <line x1="48" y1="22" x2="48" y2="20" stroke="#4f8ef7" stroke-width="1" stroke-linecap="round"/>
+  <line x1="48" y1="73" x2="48" y2="75" stroke="#4f8ef7" stroke-width="1" stroke-linecap="round"/>
+  <line x1="22" y1="48" x2="20" y2="48" stroke="#4f8ef7" stroke-width="1" stroke-linecap="round"/>
+  <line x1="73" y1="48" x2="75" y2="48" stroke="#4f8ef7" stroke-width="1" stroke-linecap="round"/>
+</svg>

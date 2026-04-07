@@ -1,0 +1,135 @@
+{% extends "admin_base.html" %}
+{% block title %}All Users{% endblock %}
+
+{% block content %}
+<div class="admin-header fade-in">
+  <div>
+    <h1>&#x1F465; All Students</h1>
+    <p class="text-muted text-sm">{{ users|length }} registered student(s)</p>
+  </div>
+</div>
+
+<div class="admin-card fade-in">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>ID</th><th>Name</th><th>Email</th>
+        <th>Role</th><th>Status</th>
+        <th>Attempts</th><th>Best %</th>
+        <th>Joined</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td class="text-muted text-sm">#{{ u.id }}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:.6rem">
+            <div class="chat-avatar" style="width:30px;height:30px;font-size:.72rem;flex-shrink:0">
+              {{ u.name[0]|upper }}
+            </div>
+            <strong>{{ u.name }}</strong>
+          </div>
+        </td>
+        <td class="text-muted text-sm">{{ u.email }}</td>
+
+        <!-- Role badge -->
+        <td>
+          {% if u.role == 'moderator' %}
+            <span style="background:rgba(124,58,237,0.15);color:#a78bfa;
+                         padding:.2rem .65rem;border-radius:6px;font-weight:700;font-size:.75rem">
+              🛡️ Moderator
+            </span>
+          {% else %}
+            <span style="background:var(--bg3);color:var(--text2);
+                         padding:.2rem .65rem;border-radius:6px;font-size:.75rem">
+              👤 User
+            </span>
+          {% endif %}
+        </td>
+
+        <!-- Ban status -->
+        <td>
+          {% if u.is_banned %}
+            <span style="background:rgba(239,68,68,0.15);color:#ef4444;
+                         padding:.25rem .65rem;border-radius:6px;font-weight:700;font-size:.75rem">
+              &#x1F6AB; Banned
+            </span>
+          {% else %}
+            <span style="background:rgba(16,185,129,0.15);color:#10b981;
+                         padding:.25rem .65rem;border-radius:6px;font-weight:700;font-size:.75rem">
+              &#x2705; Active
+            </span>
+          {% endif %}
+        </td>
+
+        <td>
+          <span style="background:rgba(79,142,247,0.12);color:var(--accent);
+                       padding:.2rem .6rem;border-radius:6px;font-weight:700;font-size:.82rem">
+            {{ u.attempts }}
+          </span>
+        </td>
+        <td>
+          {% if u.best_pct and u.best_pct > 0 %}
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <div class="pct-bar" style="width:60px">
+              <div class="pct-fill" style="width:{{ u.best_pct }}%"></div>
+            </div>
+            <span style="font-size:.8rem;font-weight:600">{{ u.best_pct }}%</span>
+          </div>
+          {% else %}
+          <span class="text-muted text-sm">&#x2014;</span>
+          {% endif %}
+        </td>
+        <td class="text-muted text-sm">
+          {{ u.created_at.strftime('%d %b %Y') if u.created_at else '' }}
+        </td>
+
+        <!-- Actions: Ban/Unban + Promote/Demote -->
+        <td>
+          <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+
+            <!-- Ban / Unban -->
+            {% if u.is_banned %}
+            <form method="POST" action="/admin/users/unban/{{ u.id }}"
+                  onsubmit="return confirm('Unban {{ u.name }}?')">
+              <button class="btn btn-success btn-sm">&#x1F513; Unban</button>
+            </form>
+            {% else %}
+            <form method="POST" action="/admin/users/ban/{{ u.id }}"
+                  onsubmit="return confirm('Ban {{ u.name }}?')">
+              <button class="btn btn-danger btn-sm">&#x1F6AB; Ban</button>
+            </form>
+            {% endif %}
+
+            <!-- Promote / Demote -->
+            {% if u.role == 'moderator' %}
+            <form method="POST" action="/admin/users/role/{{ u.id }}"
+                  onsubmit="return confirm('Remove moderator role from {{ u.name }}?')">
+              <input type="hidden" name="role" value="user">
+              <button class="btn btn-secondary btn-sm">⬇️ Demote</button>
+            </form>
+            {% else %}
+            <form method="POST" action="/admin/users/role/{{ u.id }}"
+                  onsubmit="return confirm('Make {{ u.name }} a moderator?')">
+              <input type="hidden" name="role" value="moderator">
+              <button class="btn btn-secondary btn-sm" style="background:rgba(124,58,237,0.15);color:#a78bfa;border-color:rgba(124,58,237,0.3)">
+                🛡️ Make Mod
+              </button>
+            </form>
+            {% endif %}
+
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="9" style="text-align:center;color:var(--text3);padding:3rem">
+          No students registered yet.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">🎯 India's Smartest Quiz Platform</div>
+    <h1>Master Your Exams with<br>QuizMaster Pro</h1>
+    <p>Chapter-wise tests for Class 10th, 11th & 12th. Physics, Chemistry, Math — all in one place. Track progress, compete on leaderboard!</p>
+    <div class="hero-buttons">
+      {% if session.user_id %}
+      <a href="/mocktest" class="btn btn-primary btn-lg">📋 Start Mock Test →</a>
+      <a href="/dashboard" class="btn btn-secondary btn-lg">⚡ Dashboard</a>
+      {% else %}
+      <a href="/register" class="btn btn-primary btn-lg">🚀 Get Started Free</a>
+      <a href="/login" class="btn btn-secondary btn-lg">🔑 Login</a>
+      {% endif %}
+    </div>
+    <div class="features-grid mt-3">
+      <div class="feature-card">
+        <div class="feature-icon">📚</div>
+        <h3>Chapter-wise Tests</h3>
+        <p>Targeted practice for each chapter</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⏱️</div>
+        <h3>Timed Quiz</h3>
+        <p>60 seconds per question, just like exams</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏆</div>
+        <h3>Leaderboard</h3>
+        <p>Compete with students across India</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <h3>Live Chat</h3>
+        <p>Discuss doubts with peers in real-time</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Ad Space (Google AdSense) -->
+<div style="max-width:1200px;margin:0 auto;padding:0 2rem">
+  <div class="ad-wrap">
+    <span>Advertisement</span>
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-1244250782234399"
+         data-ad-slot="auto"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+</div>
+
+<!-- How it works -->
+<section class="section" style="max-width:1200px;margin:0 auto">
+  <div style="text-align:center">
+    <h2 class="section-title">How It Works</h2>
+    <p class="section-sub">Get started in 3 easy steps</p>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem">
+    <div class="card" style="text-align:center">
+      <div style="font-size:3rem;margin-bottom:1rem">👤</div>
+      <h3 style="margin-bottom:.5rem">1. Create Account</h3>
+      <p class="text-muted text-sm">Register for free and set up your profile in seconds</p>
+    </div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:3rem;margin-bottom:1rem">🎯</div>
+      <h3 style="margin-bottom:.5rem">2. Choose Your Test</h3>
+      <p class="text-muted text-sm">Select class, subject and chapter to start a targeted quiz</p>
+    </div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:3rem;margin-bottom:1rem">📊</div>
+      <h3 style="margin-bottom:.5rem">3. Track Progress</h3>
+      <p class="text-muted text-sm">View results, climb the leaderboard and improve your scores</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+{% if not session.user_id %}
+<section class="section" style="text-align:center;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <h2 class="section-title">Ready to ace your exams?</h2>
+  <p class="text-muted mb-2">Join thousands of students already using QuizMaster Pro</p>
+  <a href="/register" class="btn btn-primary btn-lg">Start for Free →</a>
+</section>
+{% endif %}
+{% endblock %}

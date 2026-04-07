@@ -1,0 +1,478 @@
+{% extends "base.html" %}
+{% block title %}Mock Test — In Progress{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mocktest.css') }}">
+<style>
+  /* Hide the global navbar on exam page for immersion */
+  .navbar, footer { display: none !important; }
+  body { overflow: hidden; }
+  @media (max-width: 768px) { body { overflow: auto; } }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── TOP EXAM HEADER ──────────────────────────────────────────────── -->
+<div class="mt-shell" id="mt-shell">
+
+  <header class="mt-header">
+    <div class="mt-meta">
+      <span>📋</span>
+      <strong>Mock Test</strong>
+      <span style="color:var(--border)">|</span>
+      <span>{{ cls }}</span>
+      <span style="color:var(--border)">·</span>
+      <span>{{ subject }}</span>
+    </div>
+
+    <div class="mt-progress-wrap">
+      <div class="mt-progress-fill" id="mt-progress" style="width:0%"></div>
+    </div>
+
+    <span style="font-size:.78rem;color:var(--text2);flex-shrink:0" id="mt-answered-count">
+      0 / {{ total }} answered
+    </span>
+
+    <div class="mt-timer" id="mt-timer">⏱ 50:00</div>
+
+    <!-- Hamburger for sidebar on mobile (shown via CSS on small screens) -->
+    <button class="btn btn-secondary btn-sm mt-sidebar-toggle"
+            onclick="document.getElementById('mt-sidebar').classList.toggle('mobile-open')"
+            id="sidebar-toggle" aria-label="Question panel">
+      ☰
+    </button>
+  </header>
+
+  <!-- ── MAIN QUESTION AREA ──────────────────────────────────────────── -->
+  <main class="mt-main" id="mt-main">
+    <div id="question-container"></div>
+    <!-- Result view is rendered here after submit -->
+    <div id="result-container" style="display:none"></div>
+  </main>
+
+  <!-- ── SIDEBAR ─────────────────────────────────────────────────────── -->
+  <aside class="mt-sidebar" id="mt-sidebar">
+    <div class="mt-sidebar-title">
+      <span>Questions</span>
+      <span id="sb-count" style="font-weight:400;color:var(--text3)">0/{{ total }}</span>
+    </div>
+
+    <!-- Legend -->
+    <div class="mt-legend">
+      <div class="mt-legend-item">
+        <div class="mt-legend-dot" style="background:rgba(16,185,129,0.4);border:1px solid var(--accent3)"></div>
+        Answered
+      </div>
+      <div class="mt-legend-item">
+        <div class="mt-legend-dot" style="background:rgba(79,142,247,0.3);border:1px solid var(--accent)"></div>
+        Current
+      </div>
+      <div class="mt-legend-item">
+        <div class="mt-legend-dot" style="background:var(--bg3);border:1px solid var(--border)"></div>
+        Not visited
+      </div>
+    </div>
+
+    <!-- Question number grid -->
+    <div class="mt-q-grid" id="mt-q-grid"></div>
+
+    <!-- Submit -->
+    <div class="mt-submit-wrap">
+      <button class="btn btn-primary w-full" style="justify-content:center;margin-top:.75rem"
+              onclick="confirmSubmit()" id="submit-btn">
+        🏁 Submit Test
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── BOTTOM NAV BAR ──────────────────────────────────────────────── -->
+  <div class="mt-nav" id="mt-nav">
+    <button class="btn btn-secondary" onclick="prevQuestion()" id="prev-btn" disabled>
+      ← Previous
+    </button>
+    <div class="mt-nav-center">
+      <span class="mt-q-counter" id="q-counter">1 / {{ total }}</span>
+    </div>
+    <button class="btn btn-primary" onclick="nextQuestion()" id="next-btn">
+      Next →
+    </button>
+  </div>
+</div>
+
+<!-- ── CONFIRM SUBMIT MODAL ─────────────────────────────────────────── -->
+<div class="modal-overlay" id="submit-modal">
+  <div class="modal-box">
+    <div style="font-size:3rem;margin-bottom:.75rem">📋</div>
+    <h2>Submit Mock Test?</h2>
+    <p id="submit-modal-msg" style="color:var(--text2);margin-bottom:1.5rem"></p>
+    <div style="display:flex;gap:.75rem;justify-content:center">
+      <button class="btn btn-secondary" onclick="closeModal('submit-modal')">
+        ← Continue Test
+      </button>
+      <button class="btn btn-primary" onclick="submitTest()">
+        Submit Now 🏁
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── DATA FROM SERVER ──────────────────────────────────────────────────────────
+const QUESTIONS    = {{ questions|safe }};
+const TOTAL        = {{ total }};
+const DURATION_SEC = {{ duration }};
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let currentIdx   = 0;
+let answers      = {};      // { questionId: 'A'|'B'|'C'|'D' }
+let timeLeft     = DURATION_SEC;
+let timerHandle  = null;
+let autoSaveHandle = null;
+let testStarted  = Date.now();
+let submitted    = false;
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  buildSidebar();
+  renderQuestion(0);
+  startTimer();
+  startAutoSave();
+
+  // Warn before leaving
+  window.addEventListener('beforeunload', e => {
+    if (submitted) return;
+    e.preventDefault();
+    e.returnValue = '';
+  });
+});
+
+// ── TIMER ─────────────────────────────────────────────────────────────────────
+function startTimer() {
+  timerHandle = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    if (timeLeft <= 0) {
+      clearInterval(timerHandle);
+      Toast.show('Time is up! Auto-submitting…', 'warning', 4000);
+      setTimeout(submitTest, 1500);
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const el  = document.getElementById('mt-timer');
+  if (!el) return;
+  const m   = Math.floor(timeLeft / 60);
+  const s   = timeLeft % 60;
+  el.textContent = `⏱ ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.className = 'mt-timer';
+  if (timeLeft <= 300) el.classList.add('warning');
+  if (timeLeft <= 60)  el.classList.add('danger');
+}
+
+// ── AUTO-SAVE (every 10 s) ────────────────────────────────────────────────────
+function startAutoSave() {
+  autoSaveHandle = setInterval(autoSave, 10000);
+}
+async function autoSave() {
+  if (submitted) return;
+  try {
+    await fetch('/mocktest/autosave', {
+      method:  'POST',
+      headers: {'Content-Type': 'application/json'},
+      body:    JSON.stringify({ answers, time_remaining: timeLeft })
+    });
+  } catch(e) { /* silent */ }
+}
+
+// ── RENDER QUESTION ───────────────────────────────────────────────────────────
+function renderQuestion(idx) {
+  currentIdx = idx;
+  const q    = QUESTIONS[idx];
+  const num  = idx + 1;
+  const sel  = answers[q.id];
+
+  const html = `
+    <div class="mt-question-card">
+      <div class="mt-q-badge">
+        Question ${num} of ${TOTAL}
+        <span class="mt-q-sub-badge">${escHtml(q.subject)}</span>
+        <span class="mt-q-sub-badge" style="background:rgba(124,58,237,0.12);color:#a78bfa">${escHtml(q.chapter)}</span>
+      </div>
+      <div class="mt-question-text">${escHtml(q.question)}</div>
+      <div class="mt-options">
+        ${['A','B','C','D'].map(k => `
+          <button class="mt-option${sel===k?' selected':''}"
+                  onclick="selectAnswer('${q.id}','${k}')"
+                  ${submitted?'disabled':''}>
+            <span class="mt-option-key">${k}</span>
+            <span>${escHtml(q.options[k])}</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  document.getElementById('question-container').innerHTML = html;
+
+  // Update nav
+  document.getElementById('q-counter').textContent = `${num} / ${TOTAL}`;
+  document.getElementById('prev-btn').disabled = idx === 0;
+  document.getElementById('next-btn').textContent =
+    idx === TOTAL - 1 ? '🏁 Finish' : 'Next →';
+
+  // Progress bar
+  const answered = Object.keys(answers).length;
+  document.getElementById('mt-progress').style.width = `${answered/TOTAL*100}%`;
+  document.getElementById('mt-answered-count').textContent = `${answered} / ${TOTAL} answered`;
+
+  // Sidebar highlight
+  updateSidebar();
+  // Scroll main area back to top on question change
+  document.getElementById('mt-main').scrollTop = 0;
+}
+
+// ── SELECT ANSWER ─────────────────────────────────────────────────────────────
+function selectAnswer(qId, key) {
+  if (submitted) return;
+  answers[qId] = key;
+  // Refresh option highlights without full re-render
+  document.querySelectorAll('.mt-option').forEach((btn, i) => {
+    const k = ['A','B','C','D'][i];
+    btn.classList.toggle('selected', k === key);
+  });
+  // Update progress
+  const answered = Object.keys(answers).length;
+  document.getElementById('mt-progress').style.width = `${answered/TOTAL*100}%`;
+  document.getElementById('mt-answered-count').textContent = `${answered} / ${TOTAL} answered`;
+  // Update sidebar pill
+  updateSidebar();
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+function nextQuestion() {
+  if (currentIdx < TOTAL - 1) {
+    renderQuestion(currentIdx + 1);
+  } else {
+    confirmSubmit();
+  }
+}
+function prevQuestion() {
+  if (currentIdx > 0) renderQuestion(currentIdx - 1);
+}
+function goToQuestion(idx) {
+  renderQuestion(idx);
+  // Close mobile sidebar
+  document.getElementById('mt-sidebar')?.classList.remove('mobile-open');
+}
+
+// ── SIDEBAR ───────────────────────────────────────────────────────────────────
+function buildSidebar() {
+  const grid = document.getElementById('mt-q-grid');
+  grid.innerHTML = QUESTIONS.map((q, i) => `
+    <button class="mt-q-pill" id="pill-${i}" onclick="goToQuestion(${i})"
+            title="Q${i+1}: ${escHtml(q.subject)}">${i+1}</button>
+  `).join('');
+}
+
+function updateSidebar() {
+  QUESTIONS.forEach((q, i) => {
+    const pill = document.getElementById(`pill-${i}`);
+    if (!pill) return;
+    pill.className = 'mt-q-pill';
+    if (i === currentIdx)         pill.classList.add('active');
+    if (answers[q.id])            pill.classList.add('answered');
+  });
+  const answered = Object.keys(answers).length;
+  document.getElementById('sb-count').textContent = `${answered}/${TOTAL}`;
+}
+
+// ── CONFIRM SUBMIT ────────────────────────────────────────────────────────────
+function confirmSubmit() {
+  const answered = Object.keys(answers).length;
+  const skipped  = TOTAL - answered;
+  document.getElementById('submit-modal-msg').innerHTML =
+    `You answered <strong style="color:var(--accent)">${answered}</strong> out of
+     <strong>${TOTAL}</strong> questions.
+     ${skipped > 0 ? `<br><span style="color:var(--warning)">⚠️ ${skipped} question(s) unanswered.</span>` : ''}`;
+  document.getElementById('submit-modal').classList.add('open');
+}
+
+// ── SUBMIT ────────────────────────────────────────────────────────────────────
+async function submitTest() {
+  if (submitted) return;
+  submitted = true;
+  clearInterval(timerHandle);
+  clearInterval(autoSaveHandle);
+  closeModal('submit-modal');
+
+  // Show loading
+  LoadingScreen.show('Submitting your test…');
+
+  const timeTaken = Math.round((Date.now() - testStarted) / 1000);
+
+  try {
+    const res  = await fetch('/mocktest/submit', {
+      method:  'POST',
+      headers: {'Content-Type': 'application/json'},
+      body:    JSON.stringify({ answers, time_taken: timeTaken })
+    });
+    const data = await res.json();
+    LoadingScreen.hide();
+    if (data.error) { Toast.show(data.error, 'error'); submitted = false; return; }
+    showResult(data);
+  } catch(e) {
+    LoadingScreen.hide();
+    Toast.show('Submission failed. Please try again.', 'error');
+    submitted = false;
+  }
+}
+
+// ── RESULT ────────────────────────────────────────────────────────────────────
+function showResult(data) {
+  // Hide question UI
+  document.getElementById('question-container').style.display = 'none';
+  document.getElementById('mt-nav').style.display = 'none';
+  document.getElementById('mt-sidebar').style.display = 'none';
+
+  // Make shell single-column
+  const shell = document.getElementById('mt-shell');
+  shell.style.gridTemplateColumns = '1fr';
+  shell.style.gridTemplateAreas = '"header" "main"';
+
+  const pct  = data.accuracy;
+  const mins = Math.floor(data.time_taken / 60);
+  const secs = data.time_taken % 60;
+  const grade = pct >= 90 ? '🏆 Outstanding!' :
+                pct >= 70 ? '🎉 Excellent!'    :
+                pct >= 50 ? '👍 Good Effort'   : '📚 Keep Practising';
+
+  // SVG ring
+  const radius = 54, circ = 2 * Math.PI * radius;
+  const dash   = (pct / 100) * circ;
+
+  const resultHtml = `
+    <div style="max-width:820px;margin:0 auto">
+      <div class="mt-result-header fade-in">
+        <div class="mt-score-ring">
+          <svg viewBox="0 0 130 130" width="130" height="130">
+            <circle cx="65" cy="65" r="${radius}" fill="none"
+                    stroke="var(--bg3)" stroke-width="10"/>
+            <circle cx="65" cy="65" r="${radius}" fill="none"
+                    stroke="var(--accent)" stroke-width="10"
+                    stroke-dasharray="${dash.toFixed(1)} ${(circ-dash).toFixed(1)}"
+                    stroke-linecap="round"/>
+          </svg>
+          <span>${Math.round(pct)}%</span>
+        </div>
+        <h2 style="font-size:1.5rem;font-weight:900;margin-bottom:.3rem">${grade}</h2>
+        <p style="color:var(--text2)">Mock Test Complete</p>
+        <div class="mt-stat-row">
+          <div class="mt-stat-item">
+            <strong style="color:var(--accent)">${data.score}/${data.total}</strong>
+            <small>Score</small>
+          </div>
+          <div class="mt-stat-item">
+            <strong style="color:var(--accent3)">${data.accuracy}%</strong>
+            <small>Accuracy</small>
+          </div>
+          <div class="mt-stat-item">
+            <strong>${data.questions.filter(q=>q.is_correct).length}</strong>
+            <small>Correct</small>
+          </div>
+          <div class="mt-stat-item">
+            <strong style="color:var(--danger)">${data.questions.filter(q=>!q.is_correct&&q.user_answer).length}</strong>
+            <small>Wrong</small>
+          </div>
+          <div class="mt-stat-item">
+            <strong style="color:var(--text3)">${data.questions.filter(q=>!q.user_answer).length}</strong>
+            <small>Skipped</small>
+          </div>
+          <div class="mt-stat-item">
+            <strong>${mins}m ${secs}s</strong>
+            <small>Time Taken</small>
+          </div>
+        </div>
+        <div style="display:flex;gap:.75rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap">
+          <a href="/mocktest" class="btn btn-primary">🔄 New Mock Test</a>
+          <a href="/leaderboard" class="btn btn-secondary">🏆 Leaderboard</a>
+          <a href="/dashboard" class="btn btn-secondary">⚡ Dashboard</a>
+        </div>
+      </div>
+
+      <h2 style="font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--text2)">
+        📋 Answer Review (${data.total} questions)
+      </h2>
+
+      ${data.questions.map((q, i) => {
+        const state = !q.user_answer ? 'skipped' : q.is_correct ? 'correct' : 'wrong';
+        const icon  = state === 'correct' ? 'c' : state === 'wrong' ? 'w' : 's';
+        const iconChar = state === 'correct' ? '✓' : state === 'wrong' ? '✗' : '—';
+        return `
+        <div class="mt-result-q ${state} fade-in">
+          <div class="mt-result-q-header">
+            <div class="mt-result-icon ${icon}">${iconChar}</div>
+            <div style="flex:1">
+              <div style="font-size:.72rem;color:var(--text3);margin-bottom:.25rem">
+                Q${i+1} · ${escHtml(q.subject)} · ${escHtml(q.chapter)}
+              </div>
+              <div style="font-size:.9rem;font-weight:600;line-height:1.5">${escHtml(q.question)}</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem">
+            ${['A','B','C','D'].map(k => {
+              let cls2 = '';
+              if (k === q.correct)     cls2 = 'correct';
+              if (k === q.user_answer && !q.is_correct) cls2 = 'wrong';
+              return `<div class="mt-option ${cls2}" style="cursor:default;pointer-events:none">
+                <span class="mt-option-key">${k}</span>
+                <span style="font-size:.82rem">${escHtml(q.options[k])}</span>
+              </div>`;
+            }).join('')}
+          </div>
+          ${q.explanation ? `<div class="mt-explanation" style="display:block">💡 ${escHtml(q.explanation)}</div>` : ''}
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+
+  const rc = document.getElementById('result-container');
+  rc.innerHTML  = resultHtml;
+  rc.style.display = 'block';
+  document.getElementById('mt-main').scrollTop = 0;
+
+  // Update sidebar with final state
+  const header = document.querySelector('.mt-header');
+  if (header) {
+    header.querySelector('.mt-timer').textContent = '✅ Submitted';
+    header.querySelector('.mt-timer').className   = 'mt-timer';
+    header.querySelector('.mt-timer').style.cssText = 'background:rgba(16,185,129,0.15);border-color:var(--accent3);color:var(--accent3)';
+  }
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function escHtml(s) {
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+
+<style>
+/* Mobile sidebar overlay */
+@media (max-width: 768px) {
+  #sidebar-toggle { display: flex !important; }
+  .mt-sidebar {
+    position: fixed; right: 0; top: 0; bottom: 0;
+    width: 240px; z-index: 200;
+    transform: translateX(100%); transition: transform .25s ease;
+    padding-top: 70px;
+  }
+  .mt-sidebar.mobile-open { transform: translateX(0); }
+  .mt-q-grid { grid-template-columns: repeat(5,1fr) !important; }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline — QuizMaster Pro</title>
+  <link rel="icon" href="/static/icons/favicon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      --bg: #0a0e1a; --card: #161e2e; --border: #1f2d45;
+      --accent: #4f8ef7; --text: #e2e8f0; --text2: #94a3b8; --text3: #64748b;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Sora', system-ui, sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 2rem;
+    }
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 3rem 2.5rem;
+      max-width: 480px; width: 100%; text-align: center;
+    }
+    /* Animated wifi-off icon */
+    .offline-icon {
+      width: 100px; height: 100px; margin: 0 auto 1.5rem;
+      position: relative;
+    }
+    .offline-icon svg { animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(.95)} }
+
+    .slash {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .slash::after {
+      content: '';
+      width: 70%; height: 3px;
+      background: #ef4444; border-radius: 2px;
+      transform: rotate(-45deg);
+    }
+    h1 { font-size: 1.8rem; font-weight: 900; margin-bottom: .5rem; }
+    p  { color: var(--text2); line-height: 1.7; margin-bottom: 1.5rem; }
+    .badge {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3);
+      color: #f87171; padding: .35rem .9rem; border-radius: 50px;
+      font-size: .8rem; font-weight: 600; margin-bottom: 1.5rem;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .65rem 1.5rem; border-radius: 10px; font-size: .9rem;
+      font-weight: 600; border: none; cursor: pointer;
+      background: linear-gradient(135deg, #4f8ef7, #3b6de0);
+      color: #fff; text-decoration: none; transition: all .2s;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(79,142,247,.4); }
+    .tips {
+      margin-top: 2rem; text-align: left;
+      background: rgba(79,142,247,0.06); border: 1px solid rgba(79,142,247,0.15);
+      border-radius: 12px; padding: 1rem 1.2rem;
+    }
+    .tips h3 { font-size: .85rem; color: var(--accent); margin-bottom: .6rem; font-weight: 700; }
+    .tips li  { font-size: .82rem; color: var(--text3); line-height: 2; list-style: none; }
+    .tips li::before { content: '→ '; color: var(--accent); }
+    /* Connection status dot */
+    .status-dot {
+      display: inline-block; width: 8px; height: 8px;
+      background: #ef4444; border-radius: 50%;
+      animation: blink 1.2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="card">
+    <!-- Wifi-off icon -->
+    <div class="offline-icon">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15 38 C28 25 46 18 65 20" stroke="#64748b" stroke-width="5" stroke-linecap="round"/>
+        <path d="M35 53 C40 47 48 43 57 43" stroke="#64748b" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="50" cy="68" r="5" fill="#64748b"/>
+        <path d="M20 75 C30 55 42 42 58 35" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+      <div class="slash"></div>
+    </div>
+
+    <div class="badge"><span class="status-dot"></span> No Internet Connection</div>
+    <h1>You're Offline</h1>
+    <p>It looks like you've lost your internet connection. Some pages may still be available from your cache.</p>
+
+    <button class="btn" onclick="tryReconnect()">
+      🔄 Try Again
+    </button>
+
+    <div class="tips">
+      <h3>💡 While you wait</h3>
+      <ul>
+        <li>Check your Wi-Fi or mobile data</li>
+        <li>Cached pages may still be accessible</li>
+        <li>Quiz progress is saved locally</li>
+        <li>Try refreshing once you're back online</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    function tryReconnect() {
+      if (navigator.onLine) {
+        window.location.href = '/';
+      } else {
+        window.location.reload();
+      }
+    }
+
+    // Auto-redirect when connection restored
+    window.addEventListener('online', () => {
+      setTimeout(() => { window.location.href = '/'; }, 800);
+    });
+
+    // Show last online time
+    const lastOnline = localStorage.getItem('qm_last_online');
+    if (lastOnline) {
+      const d = new Date(parseInt(lastOnline));
+      const card = document.querySelector('.card p');
+      card.insertAdjacentHTML('afterend',
+        `<p style="font-size:.8rem;color:var(--text3);margin-top:-.5rem;margin-bottom:1rem">
+           Last online: ${d.toLocaleTimeString()} on ${d.toLocaleDateString()}
+         </p>`
+      );
+    }
+  </script>
+</body>
+</html>

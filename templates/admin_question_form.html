@@ -1,0 +1,100 @@
+{% extends "admin_base.html" %}
+{% block title %}{{ action }} Question{% endblock %}
+
+{% block content %}
+<div class="admin-header fade-in">
+  <div>
+    <h1>{% if action == 'Add' %}➕ Add Question{% else %}✏️ Edit Question{% endif %}</h1>
+    <p class="text-muted text-sm">{% if action == 'Add' %}Create a new quiz question{% else %}Update question #{{ q.id }}{% endif %}</p>
+  </div>
+  <a href="/admin/questions" class="btn btn-secondary btn-sm">← Back to Questions</a>
+</div>
+
+<div class="card fade-in" style="max-width:800px">
+  <form method="POST">
+    <!-- Row 1: Class, Subject, Chapter -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem">
+      <div class="form-group">
+        <label>Class *</label>
+        <select name="class_name" class="form-control" required>
+          <option value="">Select Class</option>
+          {% for c in ['10th','11th','12th'] %}
+          <option value="{{ c }}" {% if q and q.class_name==c %}selected{% endif %}>Class {{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Subject *</label>
+        <select name="subject" class="form-control" required>
+          <option value="">Select Subject</option>
+          {% for s in ['Physics','Chemistry','Math','Biology'] %}
+          <option value="{{ s }}" {% if q and q.subject==s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Chapter *</label>
+        <input type="text" name="chapter" class="form-control"
+               placeholder="e.g. Motion, Acids Bases" required
+               value="{{ q.chapter if q else '' }}">
+      </div>
+    </div>
+
+    <!-- Question -->
+    <div class="form-group">
+      <label>Question *</label>
+      <textarea name="question" class="form-control" rows="3"
+                placeholder="Enter the question text..." required
+                style="resize:vertical">{{ q.question if q else '' }}</textarea>
+    </div>
+
+    <!-- Options -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      {% for opt in ['A','B','C','D'] %}
+      <div class="form-group">
+        <label>Option {{ opt }} *</label>
+        <input type="text" name="option_{{ opt.lower() }}" class="form-control"
+               placeholder="Option {{ opt }}" required
+               value="{{ q['option_' ~ opt.lower()] if q else '' }}">
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Correct Answer + Explanation -->
+    <div style="display:grid;grid-template-columns:180px 1fr;gap:1rem">
+      <div class="form-group">
+        <label>Correct Option *</label>
+        <select name="correct_option" class="form-control" required>
+          {% for opt in ['A','B','C','D'] %}
+          <option value="{{ opt }}" {% if q and q.correct_option==opt %}selected{% endif %}>{{ opt }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Explanation (optional)</label>
+        <input type="text" name="explanation" class="form-control"
+               placeholder="Brief explanation of the correct answer"
+               value="{{ q.explanation if q else '' }}">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:.75rem;margin-top:.5rem">
+      <button type="submit" class="btn btn-primary">
+        {% if action == 'Add' %}➕ Add Question{% else %}💾 Save Changes{% endif %}
+      </button>
+      <a href="/admin/questions" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<!-- Preview Card -->
+<div class="card mt-2 fade-in" style="max-width:800px">
+  <h3 style="font-size:.9rem;font-weight:700;color:var(--text2);margin-bottom:.75rem">💡 Tips</h3>
+  <ul style="font-size:.85rem;color:var(--text3);line-height:2;list-style:disc;padding-left:1.2rem">
+    <li>Questions are randomly selected per quiz session (up to 10 per chapter)</li>
+    <li>Make sure your chapter name is consistent across questions</li>
+    <li>Explanations help students learn from mistakes — always add them!</li>
+    <li>Use bulk CSV upload for adding many questions at once</li>
+  </ul>
+</div>
+{% endblock %}

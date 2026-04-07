@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}Mock Test{% endblock %}
+{% block meta_desc %}Take a full 30-question timed mock test — Class 10th, 11th, 12th in Physics, Chemistry, Math{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mocktest.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header fade-in">
+    <h1>📋 Mock Test</h1>
+    <p>Up to 30 random questions · 50 minute timer · Testbook-style</p>
+  </div>
+
+  <!-- Selector card -->
+  <div class="card fade-in" style="max-width:640px">
+    <h2 style="font-size:1rem;font-weight:700;margin-bottom:1.25rem">
+      ⚙️ Configure Your Mock Test
+    </h2>
+    <form action="/mocktest/start" method="GET" id="mt-form" onsubmit="return validateForm()">
+
+      <!-- Row 1: Class + Subject -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group">
+          <label>Select Class *</label>
+          <select name="class_name" id="sel-class" class="form-control"
+                  required onchange="onClassChange()">
+            <option value="">-- Choose Class --</option>
+            {% for c in classes %}
+            <option value="{{ c }}">Class {{ c }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Select Subject</label>
+          <select name="subject" id="sel-subject" class="form-control"
+                  onchange="onSubjectChange()">
+            <option value="All Subjects">All Subjects</option>
+            {% for s in subjects %}
+            <option value="{{ s }}">{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <!-- Row 2: Chapter (NEW) -->
+      <div class="form-group" id="chapter-group">
+        <label>Select Chapter</label>
+        <select name="chapter" id="sel-chapter" class="form-control">
+          <option value="All Chapters">All Chapters</option>
+        </select>
+        <p class="text-muted text-xs mt-1" id="chapter-hint">
+          Select a class and subject first to filter by chapter.
+        </p>
+      </div>
+
+      <!-- Info box -->
+      <div style="background:rgba(79,142,247,0.07);border:1px solid rgba(79,142,247,0.18);
+                  border-radius:10px;padding:.85rem 1rem;margin-bottom:1.2rem;
+                  font-size:.82rem;color:var(--text2)">
+        📌 <strong style="color:var(--text)">How it works:</strong>
+        Up to 30 questions are randomly picked from your chosen filter.
+        You have <strong style="color:var(--accent)">50 minutes</strong>.
+        Navigate freely · auto-saves every 10 seconds.
+      </div>
+
+      <button type="submit" class="btn btn-primary"
+              style="width:100%;justify-content:center;padding:.75rem">
+        🚀 Start Mock Test
+      </button>
+    </form>
+  </div>
+
+  <!-- Info feature cards -->
+  <div class="mt-home-grid fade-in">
+    <div class="mt-home-card" style="cursor:default">
+      <div class="mhc-icon">⏱️</div>
+      <h3>50 Minute Timer</h3>
+      <p>Full-screen countdown. Auto-submits when time runs out.</p>
+      <div class="mt-home-badge">⚡ Real exam feel</div>
+    </div>
+    <div class="mt-home-card" style="cursor:default">
+      <div class="mhc-icon">📊</div>
+      <h3>Up to 30 Questions</h3>
+      <p>Random selection — filter by chapter for focused practice.</p>
+      <div class="mt-home-badge">🎲 Always unique</div>
+    </div>
+    <div class="mt-home-card" style="cursor:default">
+      <div class="mhc-icon">🧭</div>
+      <h3>Free Navigation</h3>
+      <p>Jump to any question via the sidebar. Skip &amp; come back.</p>
+      <div class="mt-home-badge">✅ Tick-mark sidebar</div>
+    </div>
+    <div class="mt-home-card" style="cursor:default">
+      <div class="mhc-icon">📈</div>
+      <h3>Detailed Results</h3>
+      <p>Score, accuracy, and per-question answer review.</p>
+      <div class="mt-home-badge">💡 Explanations included</div>
+    </div>
+  </div>
+
+  <!-- Ad space -->
+  <div class="ad-wrap mt-3">
+    <span>Advertisement</span>
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-client="ca-pub-1244250782234399"
+         data-ad-slot="auto" data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── Chapters data from server (dict: "Class_Subject" → [chapter, ...]) ────────
+const CHAPTERS_DATA = {{ chapters | tojson }};
+
+function onClassChange() {
+  onSubjectChange();   // re-populate chapters whenever class changes too
+}
+
+function onSubjectChange() {
+  const cls     = document.getElementById('sel-class').value;
+  const sub     = document.getElementById('sel-subject').value;
+  const chapSel = document.getElementById('sel-chapter');
+  const hint    = document.getElementById('chapter-hint');
+
+  // Reset chapter dropdown
+  chapSel.innerHTML = '<option value="All Chapters">All Chapters</option>';
+
+  if (!cls || sub === 'All Subjects') {
+    hint.textContent = 'Select a specific class and subject to filter by chapter.';
+    return;
+  }
+
+  const key    = `${cls}_${sub}`;
+  const chaps  = CHAPTERS_DATA[key] || [];
+
+  if (chaps.length === 0) {
+    hint.textContent = 'No chapters found for this class + subject combination.';
+    return;
+  }
+
+  chaps.forEach(ch => {
+    const opt   = document.createElement('option');
+    opt.value   = ch;
+    opt.textContent = ch;
+    chapSel.appendChild(opt);
+  });
+
+  hint.textContent = `${chaps.length} chapter(s) available — leave as "All Chapters" for a mixed test.`;
+}
+
+function validateForm() {
+  const cls = document.getElementById('sel-class').value;
+  if (!cls) {
+    Toast.show('Please select a class first.', 'error');
+    return false;
+  }
+  return true;
+}
+</script>
+{% endblock %}

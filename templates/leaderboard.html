@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard{% endblock %}
+{% block meta_desc %}Top Mock Test performers — QuizMaster Pro leaderboard{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header fade-in" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+    <div>
+      <h1>🏆 Leaderboard</h1>
+      <p>Top performers from Mock Tests · ranked by best accuracy</p>
+    </div>
+    <a href="/mocktest" class="btn btn-primary">📋 Take Mock Test</a>
+  </div>
+
+  {% if rows %}
+  <div class="table-wrap fade-in">
+    <table class="lb-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Student</th>
+          <th>Best Score</th>
+          <th>Best Accuracy</th>
+          <th>Avg Accuracy</th>
+          <th>Attempts</th>
+          <th>Last Attempt</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i, row in rows|enumerate %}
+        <tr>
+          <td>
+            <span class="rank-badge {% if i==0 %}rank-1{% elif i==1 %}rank-2{% elif i==2 %}rank-3{% else %}rank-n{% endif %}">
+              {% if i==0 %}🥇{% elif i==1 %}🥈{% elif i==2 %}🥉{% else %}{{ i+1 }}{% endif %}
+            </span>
+          </td>
+          <td>
+            <div style="display:flex;align-items:center;gap:.6rem">
+              <div class="chat-avatar" style="width:30px;height:30px;font-size:.75rem">
+                {{ row.name[0]|upper }}
+              </div>
+              <strong>{{ row.name }}</strong>
+            </div>
+          </td>
+          <td>
+            <strong style="color:var(--accent)">
+              {{ row.best_score }}/{{ row.total_qs }}
+            </strong>
+          </td>
+          <td>
+            <div style="display:flex;align-items:center;gap:.6rem">
+              <div class="pct-bar">
+                <div class="pct-fill" style="width:{{ row.best_accuracy }}%"></div>
+              </div>
+              <span style="font-weight:700;color:var(--accent3)">{{ row.best_accuracy }}%</span>
+            </div>
+          </td>
+          <td class="text-muted">{{ row.avg_accuracy }}%</td>
+          <td>
+            <span style="background:rgba(79,142,247,0.1);color:var(--accent);
+                         padding:.2rem .6rem;border-radius:6px;font-weight:700;font-size:.8rem">
+              {{ row.attempts }}
+            </span>
+          </td>
+          <td class="text-muted text-sm">
+            {{ row.last_attempt.strftime('%d %b %Y') if row.last_attempt else '—' }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card fade-in" style="text-align:center;padding:3rem">
+    <div style="font-size:3rem;margin-bottom:1rem">🏆</div>
+    <h3>No results yet</h3>
+    <p class="text-muted mt-1 mb-2">Be the first to complete a Mock Test!</p>
+    <a href="/mocktest" class="btn btn-primary">Take Mock Test →</a>
+  </div>
+  {% endif %}
+
+  <!-- Ad space -->
+  <div class="ad-wrap mt-3">
+    <span>Advertisement</span>
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-client="ca-pub-1244250782234399"
+         data-ad-slot="auto" data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+</div>
+{% endblock %}

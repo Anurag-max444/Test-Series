@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Live Chat{% endblock %}
+
+{% block content %}
+<div class="chat-wrap">
+  <div class="page-header fade-in" style="margin-bottom:1rem">
+    <h1>💬 Live Chat</h1>
+    <p>Chat with other students in real-time</p>
+  </div>
+  <div class="chat-box" id="chat-box">
+    {% for m in messages %}
+    <div class="chat-msg {% if m.user_name == session.user_name %}me{% endif %}">
+      <div class="chat-avatar">{{ m.user_name[0]|upper }}</div>
+      <div class="chat-bubble">
+        {% if m.user_name != session.user_name %}
+        <div class="chat-name">{{ m.user_name }}</div>
+        {% endif %}
+        <div class="chat-text">{{ m.message }}</div>
+        <div class="chat-time">{{ m.created_at.strftime('%d %b, %H:%M') if m.created_at else '' }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% if session.user_id %}
+  <div class="chat-input-wrap fade-in">
+    <input type="text" id="chat-input" class="chat-input" placeholder="Type a message..." maxlength="500">
+    <button class="btn btn-primary" onclick="sendMessage()">Send 📤</button>
+  </div>
+  {% else %}
+  <div class="card" style="text-align:center">
+    <p><a href="/login">Login</a> to join the conversation</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  {% if session.user_id %}
+  initChat('{{ session.user_name }}');
+  {% endif %}
+  // Scroll to bottom
+  const box = document.getElementById('chat-box');
+  if (box) box.scrollTop = box.scrollHeight;
+});
+</script>
+{% endblock %}

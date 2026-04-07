@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Choose Test{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header fade-in">
+    <h1>📝 Choose Your Test</h1>
+    <p>Select class, subject and chapter to begin</p>
+  </div>
+
+  <!-- Selector -->
+  <div class="quiz-selector fade-in">
+    <h2>🔍 Quick Filter</h2>
+    <div class="selector-row">
+      <div class="form-group" style="margin:0">
+        <label>Class</label>
+        <select class="form-control" id="sel-class" onchange="filterTests()">
+          <option value="">All Classes</option>
+          {% for c in classes %}
+          <option value="{{ c }}">Class {{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Subject</label>
+        <select class="form-control" id="sel-subject" onchange="filterTests()">
+          <option value="">All Subjects</option>
+          <option value="Physics">Physics</option>
+          <option value="Chemistry">Chemistry</option>
+          <option value="Math">Math</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Chapter</label>
+        <select class="form-control" id="sel-chapter">
+          <option value="">All Chapters</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="startSelected()">Start Quiz →</button>
+    </div>
+  </div>
+
+  <!-- Chapter Cards -->
+  <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:1rem" class="fade-in">📚 All Available Tests</h2>
+  <div class="chapter-cards" id="chapter-cards">
+    {% for c in classes %}
+      {% for s in ['Physics','Chemistry','Math'] %}
+        {% set key = c + '_' + s %}
+        {% if chapters.get(key) %}
+          {% for chap in chapters[key] %}
+          <a href="/quiz/start?class_name={{ c }}&subject={{ s }}&chapter={{ chap }}"
+             class="chapter-card fade-in"
+             data-class="{{ c }}" data-subject="{{ s }}" data-chapter="{{ chap }}">
+            <span class="subject-badge badge-{{ s.lower() }}">{{ s }}</span>
+            <h3>{{ chap }}</h3>
+            <p>Class {{ c }} · 10 Random Questions</p>
+            <div class="chapter-meta">
+              <span>⏱️ 10 min</span>
+              <span>❓ 10 Qs</span>
+              <span>🎯 Class {{ c }}</span>
+            </div>
+          </a>
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+  </div>
+
+  <!-- Ad Space -->
+  <div class="ad-wrap mt-3">
+    <span>Advertisement</span>
+    Google AdSense (728×90) — Place your ad code here
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const chaptersData = {{ chapters|tojson }};
+
+function filterTests() {
+  const cls = document.getElementById('sel-class').value;
+  const sub = document.getElementById('sel-subject').value;
+  
+  // Update chapter dropdown
+  const chapSel = document.getElementById('sel-chapter');
+  chapSel.innerHTML = '<option value="">All Chapters</option>';
+  if (cls && sub) {
+    const key = cls + '_' + sub;
+    const chaps = chaptersData[key] || [];
+    chaps.forEach(c => chapSel.innerHTML += `<option value="${c}">${c}</option>`);
+  }
+  
+  // Filter cards
+  document.querySelectorAll('.chapter-card').forEach(card => {
+    const matchClass = !cls || card.dataset.class === cls;
+    const matchSub = !sub || card.dataset.subject === sub;
+    card.style.display = (matchClass && matchSub) ? 'block' : 'none';
+  });
+}
+
+function startSelected() {
+  const cls = document.getElementById('sel-class').value;
+  const sub = document.getElementById('sel-subject').value;
+  const chap = document.getElementById('sel-chapter').value;
+  if (!cls || !sub || !chap) {
+    Toast.show('Please select class, subject and chapter', 'error');
+    return;
+  }
+  window.location.href = `/quiz/start?class_name=${cls}&subject=${sub}&chapter=${encodeURIComponent(chap)}`;
+}
+</script>
+{% endblock %}

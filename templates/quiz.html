@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Quiz - {{ chapter }}{% endblock %}
+
+{% block content %}
+<div class="quiz-container" id="quiz-container">
+  <!-- Quiz Header -->
+  <div class="quiz-header fade-in">
+    <div class="quiz-meta">
+      <span>🎓 Class {{ cls }}</span>
+      <span>📘 {{ subject }}</span>
+      <span>📖 {{ chapter }}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem">
+      <span class="text-muted text-sm" id="progress-text">0/{{ total }}</span>
+      <div class="progress-bar-wrap" style="width:120px">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="timer-wrap">
+        ⏱️ <span id="timer">60</span>s
+      </div>
+    </div>
+  </div>
+
+  <!-- Question Card -->
+  <div class="question-card fade-in">
+    <div class="question-num" id="q-num">Question 1 of {{ total }}</div>
+    <div class="question-text" id="q-text">Loading...</div>
+    <div class="options-grid" id="options"></div>
+    <div class="explanation-box" id="explanation" style="display:none"></div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="quiz-nav fade-in">
+    <a href="/quiz" class="btn btn-secondary">← Exit Quiz</a>
+    <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()" disabled>Next →</button>
+  </div>
+
+  <!-- Comments Section -->
+  <div class="card mt-3 fade-in">
+    <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem">💬 Discussion</h3>
+    <div id="comments-list" style="margin-bottom:1rem"></div>
+    {% if session.user_id %}
+    <div style="display:flex;gap:.75rem">
+      <input type="text" id="comment-input" class="form-control" placeholder="Ask a doubt or share a tip...">
+      <button class="btn btn-primary" onclick="submitComment('{{ cls }}','{{ subject }}','{{ chapter }}')">Post</button>
+    </div>
+    {% else %}
+    <p class="text-muted text-sm"><a href="/login">Login</a> to post comments</p>
+    {% endif %}
+  </div>
+
+  <!-- Ad Space (Google AdSense) -->
+  <div class="ad-wrap mt-2">
+    <span>Advertisement</span>
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-1244250782234399"
+         data-ad-slot="auto"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const QUESTIONS = {{ questions|safe }};
+document.addEventListener('DOMContentLoaded', () => {
+  initQuiz(QUESTIONS);
+  loadComments('{{ cls }}', '{{ subject }}', '{{ chapter }}');
+});
+</script>
+{% endblock %}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login — QuizMaster</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}
+    <div class="flash-msg" data-msg="{{ msg }}" data-type="{{ cat }}" style="display:none"></div>
+  {% endfor %}
+{% endwith %}
+<div class="auth-page">
+  <div class="auth-card fade-in">
+    <div style="font-size:2.5rem;margin-bottom:1rem">⚙️</div>
+    <h1>Admin Login</h1>
+    <p class="sub">Access the QuizMaster admin panel</p>
+    <form method="POST" action="/admin/login">
+      <div class="form-group">
+        <label>Admin Email</label>
+        <input type="email" name="email" class="form-control" placeholder="admin@quizapp.com" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" class="form-control" placeholder="Admin password" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-full" style="justify-content:center">Login to Admin →</button>
+    </form>
+    <p style="text-align:center;margin-top:1.5rem;font-size:.8rem;color:var(--text3)">
+      <a href="/">← Back to Site</a>
+    </p>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

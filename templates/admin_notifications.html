@@ -1,0 +1,90 @@
+{% extends "admin_base.html" %}
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="admin-header fade-in">
+  <div>
+    <h1>&#x1F514; Notification Center</h1>
+    <p class="text-muted text-sm">Send announcements to all users</p>
+  </div>
+</div>
+
+<!-- Send notification form -->
+<div class="notif-form-card fade-in">
+  <h2 style="font-size:1rem;font-weight:700;margin-bottom:1.2rem">&#x2709;&#xFE0F; Send New Notification</h2>
+  <form method="POST" action="/admin/notifications/send">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div class="form-group" style="margin:0">
+        <label>Title *</label>
+        <input type="text" name="title" class="form-control"
+               placeholder="e.g. New Chapter Added!" required maxlength="120">
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Send To</label>
+        <select name="target" class="form-control">
+          <option value="all">All Users</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group mt-2">
+      <label>Message *</label>
+      <textarea name="message" class="form-control" rows="3"
+                placeholder="Write your notification message here..." required
+                maxlength="500" style="resize:vertical"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary mt-1">
+      &#x1F4E8; Send to All Users
+    </button>
+  </form>
+</div>
+
+<!-- All sent notifications -->
+<h2 style="font-size:1rem;font-weight:700;margin-bottom:1rem" class="fade-in">
+  &#x1F4CB; Sent Notifications
+  <span class="text-muted text-xs" style="font-weight:400">({{ notifications|length }} total)</span>
+</h2>
+
+{% if notifications %}
+<div class="admin-card fade-in">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Message</th>
+        <th>Read / Total</th>
+        <th>Sent</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for n in notifications %}
+      <tr>
+        <td class="text-muted text-sm">#{{ n.id }}</td>
+        <td><strong>{{ n.title }}</strong></td>
+        <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+            title="{{ n.message }}">{{ n.message }}</td>
+        <td>
+          <span style="color:var(--accent);font-weight:600">{{ n.read_count }}</span>
+          <span class="text-muted"> / {{ n.total_sent }}</span>
+        </td>
+        <td class="text-muted text-sm">{{ n.created_at|string|truncate(16,True,'') }}</td>
+        <td>
+          <form method="POST" action="/admin/notifications/delete/{{ n.id }}"
+                onsubmit="return confirm('Delete this notification?')">
+            <button type="submit" class="btn btn-danger btn-sm">&#x1F5D1; Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card fade-in" style="text-align:center;padding:2.5rem">
+  <div style="font-size:3rem;margin-bottom:1rem">&#x1F514;</div>
+  <h3>No notifications sent yet</h3>
+  <p class="text-muted text-sm mt-1">Use the form above to send your first announcement.</p>
+</div>
+{% endif %}
+{% endblock %}
