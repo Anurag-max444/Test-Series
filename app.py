@@ -1,5 +1,5 @@
 # =============================================================================
-# QuizMaster Pro — app.py  v7
+# Quizly — app.py  v7
 # Changes vs v6:
 #   1. Session stores ONLY question_ids — fixes 4 KB cookie overflow
 #   2. Biology added as a subject

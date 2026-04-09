@@ -1,4 +1,4 @@
-// ── QuizMaster Pro — Notification System ─────────────────────────────────────
+// ── Quizly — Notification System ─────────────────────────────────────
 // Handles: bell badge, dropdown, mark-as-read, auto-poll
 
 const NotifSystem = {
@@ -167,7 +167,7 @@ const PWA = {
 
     window.addEventListener('appinstalled', () => {
       this.hideBanner();
-      Toast.show('QuizMaster Pro installed! 🎉', 'success', 4000);
+      Toast.show('Quizly installed! 🎉', 'success', 4000);
       this.deferredPrompt = null;
     });
 
@@ -198,10 +198,10 @@ const PWA = {
       banner.innerHTML = `
         <div class="pwa-banner-content">
           <div class="pwa-banner-icon">
-            <img src="/static/icons/icon-72x72.svg" width="36" height="36" alt="QuizMaster">
+            <img src="/static/icons/icon-72x72.svg" width="36" height="36" alt="Quizly">
           </div>
           <div class="pwa-banner-text">
-            <strong>Install QuizMaster Pro</strong>
+            <strong>Install Quizly</strong>
             <span>Add to home screen for quick access</span>
           </div>
           <button class="btn btn-primary btn-sm" onclick="PWA.install()">Install</button>
@@ -242,7 +242,7 @@ const LoadingScreen = {
     this.el.innerHTML = `
       <div class="loading-card">
         <div class="loading-logo">
-          <img src="/static/icons/icon-96x96.svg" width="64" height="64" alt="QuizMaster">
+          <img src="/static/icons/icon-96x96.svg" width="64" height="64" alt="Quizly">
         </div>
         <div class="loading-ring">
           <svg viewBox="0 0 50 50" class="loading-spinner-svg">
