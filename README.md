@@ -1,4 +1,4 @@
-# 🎯 QuizMaster Pro — Full Stack Quiz Web App
+# 🎯 Quizly — Full Stack Quiz Web App
 
 A professional, feature-rich quiz platform built with **Flask + SQLite + HTML/CSS/JS**.
 
@@ -26,11 +26,10 @@ http://localhost:5000
 ## 🔑 Default Credentials
 
 ### Admin Panel
-- URL: `http://localhost:5000/admin`
-- Email: `admin@quizapp.com`
-- Password: `admin123`
+- URL: 
+- Email: 
+- Password: 
 
-> ⚠️ Change the admin password after first login in production!
 
 ### Student
 - Register at: `http://localhost:5000/register`
