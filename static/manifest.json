@@ -1,6 +1,6 @@
 {
-  "name": "QuizMaster Pro",
-  "short_name": "QuizMaster",
+  "name": "Quizly",
+  "short_name": "Quizly",
   "description": "Chapter-wise quiz tests for Class 10th, 11th & 12th — Physics, Chemistry, Math",
   "start_url": "/",
   "display": "standalone",
